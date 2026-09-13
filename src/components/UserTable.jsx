@@ -214,7 +214,7 @@ export function UserTable({ users }) {
         <Table.Content aria-label="Table with pagination" className="min-w-150">
           <Table.Header columns={columns}>
             {(column) => (
-              <Table.Column isRowHeader={column.id === "name"}>{column.name}</Table.Column>
+              <Table.Column isRowHeader={column.id === "ID"}>{column.name}</Table.Column>
             )}
           </Table.Header>
           <Table.Body items={paginatedItems} renderEmptyState={() => (
@@ -234,9 +234,7 @@ export function UserTable({ users }) {
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="text-xs">{user.name}</span>
-                        <span className="text-xs text-muted">
-                          <a >{user.login}</a>
-                        </span>
+                        <span className="text-xs text-muted">{user.login}</span>
                       </div>
                     </a>
                 </Table.Cell>

@@ -1,7 +1,9 @@
-const GITHUB_TOKEN = import.meta.env.GITHUB_TOKE;
+var GITHUB_TOKEN;
+var MAX_DEPTH = 1;
 
 const API_URL = "https://api.github.com";
-const MAX_DEPTH = 2;
+
+const VISITED = new Set();
 
 async function githubRequest(url) {
   const response = await fetch(url, {
@@ -44,7 +46,7 @@ async function getFollowing(username) {
       break;
     }
 
-    results.push(...users);
+    results.push(...users.map(user => user.login));
 
     // Less than 100 means this was the last page.
     if (users.length < 100) {
@@ -60,16 +62,16 @@ async function getFollowing(username) {
 /**
  * Recursively traverse the GitHub following graph.
  */
-async function crawlFollowing(username, depth = 0, visited = new Set()) {
+async function crawlFollowing(username, depth = 0) {
   if (depth > MAX_DEPTH) {
     return;
   }
 
-  if (visited.has(username)) {
+  if (VISITED.has(username)) {
     return;
   }
 
-  visited.add(username);
+  VISITED.add(username);
 
   console.log(
     `${"  ".repeat(depth)}→ ${username} (depth ${depth})`
@@ -77,22 +79,27 @@ async function crawlFollowing(username, depth = 0, visited = new Set()) {
 
   const following = await getFollowing(username);
 
+  const pick = (obj, keys) => Object.fromEntries(keys.map(key => [key, obj[key]]));
+
   for (const user of following) {
-    const user_data = await githubRequest(`${API_URL}/users/${user.login}`);
-    const social_data = await githubRequest(`${API_URL}/users/${user.login}/social_accounts?per_page=100`);
-    self.postMessage({ flag: "data", data: { ...user_data, social_data } });
+    const user_data = await githubRequest(`${API_URL}/users/${user}`);
+    const social_data = await githubRequest(`${API_URL}/users/${user}/social_accounts?per_page=100`);
+    self.postMessage({ flag: "data", data: { ...pick(user_data, ["login", "avatar_url", "name", "company", "blog", "location", "email", "bio", "public_repos", "followers", "following"]), social_data } });
     
     await crawlFollowing(
-      user.login,
+      user,
       depth + 1,
-      visited
     );
   }
 }
 
 self.onmessage = e => {
   // Starting GitHub username
-  const START_USERNAME = e.data;
+  const START_USERNAME = e.data.crawler_user;
+
+  GITHUB_TOKEN = e.data.token;
+
+  MAX_DEPTH = e.data.depth;
   
   crawlFollowing(START_USERNAME)
     .then(() => {

@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import heroImg from "./assets/hero.png";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
 import "./App.css";
 import UserTable from "./components/UserTable";
 import { Button } from '@heroui/react';
 import { TextField, Input, Spinner } from '@heroui/react';
+import {Label, NumberField} from "@heroui/react";
 
 function App() {
   const workerRef = useRef(null);
   const [users, setUsers] = useState([]);
+  const [depth, setDepth] = useState(1);
   const [crawler_user, setCrawlerUser] = useState("");
   const [isWorking, setIsWorking] = useState(false);
   useEffect(() => {
@@ -28,9 +27,16 @@ function App() {
         <TextField className="w-full max-w-64 mr-4" name="email">
           <Input placeholder="Enter Github User Name..." value={crawler_user} onChange={(e) => setCrawlerUser(e.target.value)} />
         </TextField>
+        <NumberField className="w-full max-w-64 mr-4" value={depth} onChange={(e) => setDepth(setDepth(e))} minValue={1} name="width">
+          <NumberField.Group>
+            <NumberField.DecrementButton />
+            <NumberField.Input className="w-30" />
+            <NumberField.IncrementButton />
+          </NumberField.Group>
+        </NumberField>
         <Button
           onClick={() => {
-            workerRef.current.postMessage(crawler_user);
+            workerRef.current.postMessage({ crawler_user, depth, token: import.meta.env.VITE_GITHUB_TOKEN });
             setIsWorking(true);
           }}
           className="crawl-btn"
