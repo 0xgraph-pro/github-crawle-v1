@@ -287,13 +287,14 @@ export function UserTable({ users }) {
                 </Table.Cell>
                 <Table.Cell>
                   <div className="flex gap-2">
-                    {user.email == "null" ? <a href={`mailto:${user.email}`}><img src="/icons/icon-email.png" width={24} height={24} /></a> : ""}
+                    {user.email == "null" ? <a href={`mailto:${user.email}`} target={"_blank"}><img src="/icons/icon-email.png" width={24} height={24} /></a> : ""}
+                    {user.blog == "" ? "" : <a href={user.blog} target={"_blank"}><img src={`/icons/icon-${user.blog.includes("linkedin") ? "linkedin" : "website"}.png`} width={24} height={24} /></a>}
                     {user.social_data.map(social => {
                       switch(social.provider) {
                         case "linkedin":
-                          return <a href={social.url}><img src="/icons/icon-linkedin.png" width={24} height={24} /></a>
+                          return <a href={social.url} target={"_blank"}><img src="/icons/icon-linkedin.png" width={24} height={24} /></a>
                         case "twitter":
-                          return <a href={social.url}><img src="/icons/icon-twitter.png" width={24} height={24} /></a>
+                          return <a href={social.url} target={"_blank"}><img src="/icons/icon-twitter.png" width={24} height={24} /></a>
                       }
                     })}
                   </div>
