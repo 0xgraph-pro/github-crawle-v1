@@ -156,6 +156,7 @@ import {Pagination, Table} from "@heroui/react";
 import {useMemo, useState} from "react";
 import { Avatar, EmptyState } from '@heroui/react';
 import { Icon } from "@iconify/react";
+import { PaginationControlled } from "./PaginationControlled";
 
 const columns = [
   {id: "ID", name: "#ID"},
@@ -207,6 +208,37 @@ export function UserTable({ users }) {
   }, [page, users.length]);
   const start = (page - 1) * ROWS_PER_PAGE + 1;
   const end = Math.min(page * ROWS_PER_PAGE, users.length);
+
+  const getPageNumbers = () => {
+    const pages = [];
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   return (
     <Table >
@@ -286,13 +318,19 @@ export function UserTable({ users }) {
                 Prev
               </Pagination.Previous>
             </Pagination.Item>
-            {pages.map((p) => (
-              <Pagination.Item key={p}>
-                <Pagination.Link isActive={p === page} onPress={() => setPage(p)}>
-                  {p}
-                </Pagination.Link>
-              </Pagination.Item>
-            ))}
+            {getPageNumbers().map((p, i) => {
+              return (p === "ellipsis" ? (
+                <Pagination.Item key={`ellipsis-${i}`}>
+                  <Pagination.Ellipsis />
+                </Pagination.Item>
+              ) : (
+                <Pagination.Item key={p}>
+                  <Pagination.Link isActive={p === page} onPress={() => setPage(p)}>
+                    {p}
+                  </Pagination.Link>
+                </Pagination.Item>
+              ));
+            })}
             <Pagination.Item>
               <Pagination.Next
                 isDisabled={page === totalPages}
